@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  main:
+    container_name: 'expo-nest'
+    build:
+      context: .
+    volumes:
+      - .:/server
+      - /server/node_modules
+    ports:
+      - 2000:2000
+    env_file: .env
+    command: 'yarn start --watch'
+    depends_on:
+      - postgres
+    networks:
+      - db
+
+  postgres:
+    container_name: postgres
+    image: postgres:latest
+    ports:
+      - 5432:5432
+    volumes:
+      - /data/postgres:/data/postgres
+    env_file:
+      - docker.env
+    networks:
+      - postgres
+      - db
+
+  pgadmin:
+    links:
+      - postgres:postgres
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    depends_on:
+      - postgres
+    ports:
+      - 8080:80
+    volumes:
+      - /data/pgadmin:/root/.pgadmin
+    env_file:
+      - docker.env
+    networks:
+      - postgres
+networks:
+  db:
+    driver: bridge
+  postgres:
+    driver: bridge
